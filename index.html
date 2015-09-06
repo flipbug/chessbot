@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Game of Chess</title>
+		<script src="src/chessboard.js"></script>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	
+	<body>
+		<canvas id="canvas" width="1200" height="1200"></canvas>
+		<script>
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			
+			var chessboard = new Chessboard();
+			chessboard.draw(context, 80);
+		</script>	
+	</body>
+</html>
