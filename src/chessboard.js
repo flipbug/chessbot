@@ -7,7 +7,7 @@
 
 function Chessboard(x, y) {
 	this.board = [];
-	this.dimension = 80;
+	this.dimension = 60;
 	this.startX = x;
 	this.startY = y;
 	 	

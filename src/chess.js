@@ -27,18 +27,16 @@
  Chess.prototype.update = function() {
 	 this.stage.update();
  }
- 
+
  Chess.prototype.initFigurePlacement = function() {
 	 var board = this.chessboard.getBoard();
 	 for (var i = 0; i < board.length; i++) {
 	 	var row = board[i];
 		for (var j = 0; j < row.length; j++) {
+			var pos = this.chessboard.getPositionFromCoordinates(j, i);
 			if (row[j] == 6) {
-				var pos = this.chessboard.getPositionFromCoordinates(j, i);
-				var pawn = new createjs.Bitmap("assets/pawn_black.svg");
-				pawn.x = pos.x;
-				pawn.y = pos.y;
-				this.stage.addChild(pawn);
+				var pawn = new Pawn(0);
+				pawn.draw(pos, this.stage);
 			}
 		}
 	 }

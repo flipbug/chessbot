@@ -6,23 +6,37 @@
  * @author Daniel Milenkovic
  */
  
- function Figure(sprite_0, sprite_1) {
- 	this.sprite_0 = sprite_1;
- 	this.x = 0;
- 	this.y = 0;
-	 
+ var Figure = function(side) {
+  	this.side = side;
+  	this.images = ["", ""];
+ }
+
+ Figure.prototype.draw = function(pos, stage) {
+	var figure = new createjs.Bitmap(this.getImage());
+	figure.image.onload = function() { 
+		stage.update();
+	} 
+	
+	figure.x = pos.x;
+	figure.y = pos.y;
+	
+	stage.addChild(figure);
+ }
+  
+ Figure.prototype.getImage = function() {
+ 	return this.images[this.side]
  }
  
- Figure.prototype.setSide = function(side) {
- 	this.side = side;
+ Figure.prototype.setImages = function(images) {
+	this.images = images;
  }
- 
+
  Figure.prototype.move = function(x, y) {
 	 
  }
  
- Figure.prototype.draw = function() {
-	 
+ var Pawn = function(side) {
+ 	this.side = side;
+	this.images = ["assets/pawn_black.png", "assets/pawn_white.png"]
  }
- 
- Pawn = new Figure('../assets/pawn_black.svg', '../assets/pawn_white.svg');
+ Pawn.prototype = Object.create(Figure.prototype);
