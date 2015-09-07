@@ -26,8 +26,8 @@ function Chessboard(x, y) {
 Chessboard.prototype.draw = function(stage, dimension) {
 	var xPos = this.startX,
 		yPos = this.startY,
-		firstColor = "#E4E5E2",
-		secondColor = "#262626";
+		firstColor = "#E5C4A0",
+		secondColor = "#756452";
 		
 	this.dimension = dimension;
 	
@@ -50,7 +50,7 @@ Chessboard.prototype.draw = function(stage, dimension) {
 }
 
 Chessboard.prototype.getPositionFromCoordinates = function(x, y) {
-	return { 'x': x * this.dimension, 'y': y * this.dimension };
+	return { 'x': x * this.dimension + this.startX, 'y': y * this.dimension + this.startY };
 }
 
 Chessboard.prototype.getBoard = function() {
