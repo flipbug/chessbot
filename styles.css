@@ -2,6 +2,14 @@ body {
 	background: #F1EADB;
 }
 
+h1 {
+	font-family: 'Montserrat', sans-serif;
+	font-size: 36px;
+	color: #D0C7B7;
+	margin-top: 20px;
+	margin-left: 20px;
+}
+
 canvas {
 	width: 400px;
 	margin: 50px auto;
