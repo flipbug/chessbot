@@ -20,7 +20,6 @@ function Chessboard(x, y) {
 	this.board[5] = [0,0,0,0,0,0,0,0];
 	this.board[6] = [7,7,7,7,7,7,7,7];
 	this.board[7] = [8,9,10,11,12,10,9,8];
-
 }
 	
 Chessboard.prototype.draw = function(stage, dimension) {
@@ -51,6 +50,11 @@ Chessboard.prototype.draw = function(stage, dimension) {
 
 Chessboard.prototype.getPositionFromCoordinates = function(x, y) {
 	return { 'x': x * this.dimension + this.startX, 'y': y * this.dimension + this.startY };
+}
+
+
+Chessboard.prototype.getCoordinatesFromPosition = function(x, y) {
+	return { 'x': Math.round((x - this.startX) / this.dimension), 'y': Math.round((y - this.startY) / this.dimension) };
 }
 
 Chessboard.prototype.getBoard = function() {

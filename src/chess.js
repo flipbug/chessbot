@@ -10,20 +10,24 @@
  		
 	 this.context = canvas.getContext("2d");
 	 this.dimension = dimension;
+	 this.offsetX = 20;
+	 this.offsetY = 0;
 	 
 	 // init easel.js
 	 this.stage = new createjs.Stage(canvas);
 	 this.stage.enableMouseOver();
+	 this.stage.mouseMoveOutside = true; 
+	 
+	 createjs.Touch.enable(this.stage);
  }
  
  Chess.prototype.start = function() {
-	 this.chessboard = new Chessboard(20, 0);
+	 this.chessboard = new Chessboard(this.offsetX, this.offsetY);
 	 this.chessboard.draw(this.stage, this.dimension);
 	 this.initFigurePlacement();
 	 this.update();
  }
 
- 
  Chess.prototype.update = function() {
 	 this.stage.update();
  }
@@ -37,10 +41,48 @@
 			var pos = this.chessboard.getPositionFromCoordinates(j, i);
 			var figure = this.getFigureByNumber(row[j]);
 			if (figure) {
-				figure.draw(pos, this.stage);
+				figure.init(pos, this);
 			}
 		}
 	 }
+ }
+ 
+ Chess.prototype.makeMove = function(x, y, figure) {
+	 // get coordinates
+	 var coords = this.chessboard.getCoordinatesFromPosition(x, y);
+	 var moveValid = this.checkMove(coords.x, coords.y);
+	 
+	 if (moveValid) {
+	     // snap into tile
+	     var pos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
+		 figure.shape.x =  pos.x;
+		 figure.shape.y =  pos.y;
+		 
+		 // update chessboard matrix
+		 var oldCoords = this.chessboard.getCoordinatesFromPosition(figure.shape.originX, figure.shape.originY);
+		 this.chessboard.board[oldCoords.y][oldCoords.x] = 0;
+		 this.chessboard.board[coords.y][coords.x] = figure.type;
+		
+		 figure.shape.originX = figure.shape.x;
+		 figure.shape.originY = figure.shape.y;
+	 } else {
+		 // revert to previous position
+		 figure.shape.x = figure.shape.originX;
+		 figure.shape.y = figure.shape.originY;
+	 }
+			
+	 this.stage.update();
+ }
+ 
+ Chess.prototype.checkMove = function(x, y) {
+ 	 // todo: define rules!
+ 	 if (x >= this.chessboard.board.length || x < 0 || y >= this.chessboard.board.length || y < 0) {
+	 	 return false;
+ 	 }
+	 if (this.chessboard.board[y][x] > 0) {
+		 return false;
+	 }
+	 return true;
  }
  
  Chess.prototype.getFigureByNumber = function(number) {
