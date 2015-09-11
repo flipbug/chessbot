@@ -3,8 +3,6 @@
  *
  * @author Daniel Milenkovic
  */
-
-
 function Chessboard(x, y) {
 	this.board = [];
 	this.dimension = 60;
@@ -49,12 +47,13 @@ Chessboard.prototype.draw = function(stage, dimension) {
 }
 
 Chessboard.prototype.getPositionFromCoordinates = function(x, y) {
-	return { 'x': x * this.dimension + this.startX, 'y': y * this.dimension + this.startY };
+	return { 	'x': x * this.dimension + this.startX, 
+				'y': y * this.dimension + this.startY };
 }
 
-
 Chessboard.prototype.getCoordinatesFromPosition = function(x, y) {
-	return { 'x': Math.round((x - this.startX) / this.dimension), 'y': Math.round((y - this.startY) / this.dimension) };
+	return { 	'x': Math.round((x - this.startX) / this.dimension), 
+				'y': Math.round((y - this.startY) / this.dimension) };
 }
 
 Chessboard.prototype.getBoard = function() {

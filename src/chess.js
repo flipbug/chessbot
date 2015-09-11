@@ -5,13 +5,19 @@
  *
  * @author Daniel Milenkovic
  */
- 
  function Chess(canvas, dimension) {
  		
 	 this.context = canvas.getContext("2d");
 	 this.dimension = dimension;
-	 this.offsetX = 20;
+	 this.offsetX = 90;
 	 this.offsetY = 0;
+	 
+	 // store each figure in an array
+	 this.figures = [];
+	 
+	 // white begins
+	 this.activePlayer = 1;
+	 this.npc = null;
 	 
 	 // init easel.js
 	 this.stage = new createjs.Stage(canvas);
@@ -42,6 +48,8 @@
 			var figure = this.getFigureByNumber(row[j]);
 			if (figure) {
 				figure.init(pos, this);
+				// store figure
+				this.figures.push(figure);
 			}
 		}
 	 }
@@ -50,8 +58,9 @@
  Chess.prototype.makeMove = function(x, y, figure) {
 	 // get coordinates
 	 var coords = this.chessboard.getCoordinatesFromPosition(x, y);
-	 var moveValid = this.checkMove(coords.x, coords.y);
+	 var oldCoords = this.chessboard.getCoordinatesFromPosition(figure.shape.originX, figure.shape.originY);
 	 
+	 var moveValid = this.checkMove(oldCoords, coords, figure);
 	 if (moveValid) {
 	     // snap into tile
 	     var pos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
@@ -59,7 +68,6 @@
 		 figure.shape.y =  pos.y;
 		 
 		 // update chessboard matrix
-		 var oldCoords = this.chessboard.getCoordinatesFromPosition(figure.shape.originX, figure.shape.originY);
 		 this.chessboard.board[oldCoords.y][oldCoords.x] = 0;
 		 this.chessboard.board[coords.y][coords.x] = figure.type;
 		
@@ -74,15 +82,46 @@
 	 this.stage.update();
  }
  
- Chess.prototype.checkMove = function(x, y) {
- 	 // todo: define rules!
- 	 if (x >= this.chessboard.board.length || x < 0 || y >= this.chessboard.board.length || y < 0) {
+ Chess.prototype.checkMove = function(oldPos, newPos, figure) {
+  	 // check if move is inside the board
+ 	 if (newPos.x >= this.chessboard.board.length || newPos.x < 0 || newPos.y >= this.chessboard.board.length || newPos.y < 0) {
 	 	 return false;
  	 }
-	 if (this.chessboard.board[y][x] > 0) {
-		 return false;
-	 }
+ 	 
+ 	 // check if move was valid
+ 	 if (!figure.validateMove(oldPos, newPos, this.chessboard.board)) {
+ 	 	 return false;
+ 	 }
+ 	 
+ 	 // if place is already occupied
+ 	 var target = this.chessboard.board[newPos.y][newPos.x];
+ 	 if (target > 0) {
+	 	 // check if place is occupied by an ally
+	 	 if ((figure.type < 7 && target < 7) || (figure.type > 6 && target > 6)) {
+		 	 return false
+	 	 } else {
+		 	 this.killFigure(newPos, figure);
+	 	 }
+
+ 	 }
+ 	 
 	 return true;
+ }
+ 
+ Chess.prototype.killFigure = function(pos, attacker) {
+	 var scope = this;
+	 // search & remove figure from stage
+	 this.figures.forEach(function(item, index) {
+	 	 var itemPos = scope.chessboard.getCoordinatesFromPosition(item.shape.x, item.shape.y);
+		 if (pos.x == itemPos.x && pos.y == itemPos.y && attacker != item) {
+			 scope.stage.removeChild(item.shape);
+			 scope.figures.splice(index, 1);
+			 // todo: do something with dead figures
+			 return true;
+		 } 
+	 });
+	 
+	 return false;
  }
  
  Chess.prototype.getFigureByNumber = function(number) {
