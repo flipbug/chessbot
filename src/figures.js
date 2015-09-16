@@ -12,6 +12,10 @@ function Figure(side) {
 
 Figure.prototype.init = function(pos, global) {
 	var shape = new createjs.Bitmap(this.getImage());
+	
+	// todo: clean me up!
+	this.shape = shape;
+	var figure = this;
 
 	// update stage after image has loaded
 	shape.image.onload = function() {
@@ -29,20 +33,18 @@ Figure.prototype.init = function(pos, global) {
 	shape.y = shape.originY = pos.y;
 
 	// make draggable
-	shape.on("pressmove", function(evt) {
-		// include a small offset, so it stays with the cursor
-		evt.target.x = evt.stageX - (shape.image.width / 2);
-		evt.target.y = evt.stageY - (shape.image.height / 2);
+	shape.on("pressmove", function(event) {
+		if (global.currentTurn == figure.side) {
+			// include a small offset, so it stays with the cursor
+			event.target.x = event.stageX - (shape.image.width / 2);
+			event.target.y = event.stageY - (shape.image.height / 2);
 
-		// bring to front
-		global.stage.addChild(shape);
+			// bring to front
+			global.stage.addChild(shape);
 
-		global.stage.update();
+			global.stage.update();
+		}
 	});
-
-	// todo: clean me up!
-	this.shape = shape;
-	var figure = this;
 
 	// make move after figure has been dropped
 	shape.on("pressup", function(evt) {

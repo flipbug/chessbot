@@ -17,7 +17,7 @@ function Chess(canvas, dimension) {
 	this.figures = [];
 
 	// white begins
-	this.activePlayer = 1;
+	this.currentTurn = 1;
 	this.npc = null;
 
 	// init easel.js
@@ -74,6 +74,9 @@ Chess.prototype.makeMove = function(x, y, figure) {
 
 		figure.shape.originX = figure.shape.x;
 		figure.shape.originY = figure.shape.y;
+	
+		// next turn
+		this.currentTurn = this.currentTurn == 1 ? 0 : 1;
 	} else {
 		// revert to previous position
 		figure.shape.x = figure.shape.originX;
