@@ -62,6 +62,51 @@ Figure.prototype.setImages = function(images) {
 	this.images = images;
 }
 
+Figure.prototype.isJumping = function(oldPos, newPos, board) {
+	var xOperator = oldPos.x < newPos.x ? 1 : -1,
+		yOperator = oldPos.y < newPos.y ? 1 : -1,
+
+		diffX = Math.abs(oldPos.x - newPos.x),
+		diffY = Math.abs(oldPos.y - newPos.y),
+
+		currentY = oldPos.y,
+		currentX = oldPos.x,
+
+		diagonal = false;
+
+	if (diffX == diffY) {
+		diagonal = true;
+	}
+
+	if (diffX > 0) {
+		for (var i = oldPos.x + xOperator;
+			(i < newPos.x && xOperator > 0) ||
+			(i > newPos.x && xOperator < 0); i += xOperator) {
+				
+			currentY += yOperator;
+			if (diagonal && board[currentY][i] > 0) {
+				return true;
+			} else if (!diagonal && board[oldPos.y][i] > 0) {
+				return true;
+			}
+		}
+	} else {
+		for (var i = oldPos.y + yOperator;
+			(i < newPos.y && yOperator > 0) ||
+			(i > newPos.y && yOperator < 0); i += yOperator) {
+
+			currentX += xOperator;
+			if (diagonal && board[i][currentX] > 0) {
+				return true;
+			} else if (!diagonal && board[i][oldPos.x] > 0) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 
 /**
  * Pawn
@@ -95,6 +140,7 @@ Pawn.prototype.validateMove = function(oldPos, newPos, board) {
 				valid = true
 			}
 		} else if (diffX == 1 && diffY == 1 && target > 0) {
+			// diagonal if there is an enemy
 			valid = true;
 		}
 	}
@@ -128,10 +174,12 @@ Rook.prototype.validateMove = function(oldPos, newPos, board) {
 
 	// only on axis at a time
 	if (diffX === 0 || diffY === 0) {
-		// todo: prevent jumping
-		valid = true;
+		// prevent jumping
+		if (!this.isJumping(oldPos, newPos, board)) {
+			valid = true;
+		}
 	}
-
+	
 	return valid;
 }
 
@@ -183,8 +231,10 @@ Bishop.prototype.validateMove = function(oldPos, newPos, board) {
 
 	// diagonal move pattern
 	if (diffX == diffY) {
-		// todo: prevent jumping
-		valid = true;
+		// prevent jumping
+		if (!this.isJumping(oldPos, newPos, board)) {
+			valid = true;
+		}
 	}
 
 	return valid;
@@ -211,8 +261,10 @@ Queen.prototype.validateMove = function(oldPos, newPos, board) {
 
 	// diagonal or straight move pattern
 	if (diffX == diffY || diffX === 0 || diffY === 0) {
-		// todo: prevent jumping
-		valid = true;
+		// prevent jumping
+		if (!this.isJumping(oldPos, newPos, board)) {
+			valid = true;
+		}
 	}
 
 	return valid;

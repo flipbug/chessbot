@@ -1,11 +1,10 @@
 /**
  * Chess
  *
- * Containes the main logic of the game
+ * Contains the main logic of the game
  *
  * @author Daniel Milenkovic
  */
-
 function Chess(canvas, dimension) {
 
 	this.context = canvas.getContext("2d");
@@ -76,7 +75,7 @@ Chess.prototype.makeMove = function(x, y, figure) {
 		figure.shape.originY = figure.shape.y;
 	
 		// next turn
-		this.currentTurn = this.currentTurn == 1 ? 0 : 1;
+		this.currentTurn = this.currentTurn ? 0 : 1;
 	} else {
 		// revert to previous position
 		figure.shape.x = figure.shape.originX;
