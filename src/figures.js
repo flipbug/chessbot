@@ -31,7 +31,16 @@ Figure.prototype.init = function(pos, global) {
 	// set initial position
 	shape.x = shape.originX = pos.x;
 	shape.y = shape.originY = pos.y;
-
+	
+	// change cursor
+	shape.on("mouseover", function() {
+		if (global.currentTurn == figure.side) {
+			shape.cursor = 'pointer';
+		} else {
+			shape.cursor = 'default';
+		}
+	});
+	
 	// make draggable
 	shape.on("pressmove", function(event) {
 		if (global.currentTurn == figure.side) {
