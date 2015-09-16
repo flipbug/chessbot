@@ -1,5 +1,5 @@
 /**
- * Chessboard 
+ * Chessboard
  *
  * @author Daniel Milenkovic
  */
@@ -8,26 +8,26 @@ function Chessboard(x, y) {
 	this.dimension = 60;
 	this.startX = x;
 	this.startY = y;
-	 	
+
 	// create the 8x8 chessboard with the initial setup
-	this.board[0] = [1,2,3,4,5,3,2,1];
-	this.board[1] = [6,6,6,6,6,6,6,6];
-	this.board[2] = [0,0,0,0,0,0,0,0];
-	this.board[3] = [0,0,0,0,0,0,0,0];
-	this.board[4] = [0,0,0,0,0,0,0,0];
-	this.board[5] = [0,0,0,0,0,0,0,0];
-	this.board[6] = [7,7,7,7,7,7,7,7];
-	this.board[7] = [8,9,10,11,12,10,9,8];
+	this.board[0] = [1, 2, 3, 4, 5, 3, 2, 1];
+	this.board[1] = [6, 6, 6, 6, 6, 6, 6, 6];
+	this.board[2] = [0, 0, 0, 0, 0, 0, 0, 0];
+	this.board[3] = [0, 0, 0, 0, 0, 0, 0, 0];
+	this.board[4] = [0, 0, 0, 0, 0, 0, 0, 0];
+	this.board[5] = [0, 0, 0, 0, 0, 0, 0, 0];
+	this.board[6] = [7, 7, 7, 7, 7, 7, 7, 7];
+	this.board[7] = [8, 9, 10, 11, 12, 10, 9, 8];
 }
-	
+
 Chessboard.prototype.draw = function(stage, dimension) {
 	var xPos = this.startX,
 		yPos = this.startY,
 		firstColor = "#E5C4A0",
 		secondColor = "#756452";
-		
+
 	this.dimension = dimension;
-	
+
 	for (var i = 0; i < this.board.length; i++) {
 		var row = this.board[i];
 		xPos = this.startX;
@@ -47,13 +47,17 @@ Chessboard.prototype.draw = function(stage, dimension) {
 }
 
 Chessboard.prototype.getPositionFromCoordinates = function(x, y) {
-	return { 	'x': x * this.dimension + this.startX, 
-				'y': y * this.dimension + this.startY };
+	return {
+		'x': x * this.dimension + this.startX,
+		'y': y * this.dimension + this.startY
+	};
 }
 
 Chessboard.prototype.getCoordinatesFromPosition = function(x, y) {
-	return { 	'x': Math.round((x - this.startX) / this.dimension), 
-				'y': Math.round((y - this.startY) / this.dimension) };
+	return {
+		'x': Math.round((x - this.startX) / this.dimension),
+		'y': Math.round((y - this.startY) / this.dimension)
+	};
 }
 
 Chessboard.prototype.getBoard = function() {
