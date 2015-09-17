@@ -57,7 +57,8 @@ Figure.prototype.init = function(pos, global) {
 
 	// make move after figure has been dropped
 	shape.on("pressup", function(evt) {
-		global.makeMove(evt.target.x, evt.target.y, figure);
+		var coords = global.chessboard.getCoordinatesFromPosition(evt.target.x, evt.target.y);
+		global.makeMove(coords, figure, false);
 	});
 
 	global.stage.addChild(shape);

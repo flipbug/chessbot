@@ -13,16 +13,20 @@ function Chess(canvas, dimension) {
 	this.offsetY = 0;
 
 	// store each figure in an array
-	this.figures = [];
+	this.figures = [[],[]];
 
 	// white begins
 	this.currentTurn = 1;
-	this.npc = null;
+	this.bot = new Bot(0, 2);
 
 	// init easel.js
 	this.stage = new createjs.Stage(canvas);
 	this.stage.enableMouseOver();
 	this.stage.mouseMoveOutside = true;
+	
+	// conifgure ticker to use requestAnimationFrame
+	// createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
+	// createjs.Ticker.setFPS(10);
 
 	createjs.Touch.enable(this.stage);
 }
@@ -32,6 +36,8 @@ Chess.prototype.start = function() {
 	this.chessboard.draw(this.stage, this.dimension);
 	this.initFigurePlacement();
 	this.update();
+	
+	this.bot.init(this);
 }
 
 Chess.prototype.update = function() {
@@ -49,19 +55,25 @@ Chess.prototype.initFigurePlacement = function() {
 			if (figure) {
 				figure.init(pos, this);
 				// store figure
-				this.figures.push(figure);
+				var side = row[j] > 6 ? 1 : 0
+				this.figures[side].push(figure);
 			}
 		}
 	}
 }
 
-Chess.prototype.makeMove = function(x, y, figure) {
-	// get coordinates
-	var coords = this.chessboard.getCoordinatesFromPosition(x, y);
+Chess.prototype.makeMove = function(coords, figure, isBot) {
+	// get old coordinates
 	var oldCoords = this.chessboard.getCoordinatesFromPosition(figure.shape.originX, figure.shape.originY);
 
 	var moveValid = this.checkMove(oldCoords, coords, figure);
 	if (moveValid) {
+		// kill enemy if there is one
+		var target = this.chessboard.board[coords.y][coords.x];
+		if (target > 0) {
+			this.killFigure(coords, figure);
+		}
+			
 		// snap into tile
 		var pos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
 		figure.shape.x = pos.x;
@@ -76,13 +88,20 @@ Chess.prototype.makeMove = function(x, y, figure) {
 	
 		// next turn
 		this.currentTurn = this.currentTurn ? 0 : 1;
+		if (!isBot && this.currentTurn === this.bot.side) {
+			this.bot.makeMove();
+		}
 	} else {
 		// revert to previous position
 		figure.shape.x = figure.shape.originX;
 		figure.shape.y = figure.shape.originY;
+		
+		this.stage.update();
+		return false;
 	}
 
 	this.stage.update();
+	return true;
 }
 
 Chess.prototype.checkMove = function(oldPos, newPos, figure) {
@@ -102,10 +121,7 @@ Chess.prototype.checkMove = function(oldPos, newPos, figure) {
 		// check if place is occupied by an ally
 		if ((figure.type < 7 && target < 7) || (figure.type > 6 && target > 6)) {
 			return false
-		} else {
-			this.killFigure(newPos, figure);
 		}
-
 	}
 
 	return true;
@@ -113,13 +129,14 @@ Chess.prototype.checkMove = function(oldPos, newPos, figure) {
 
 Chess.prototype.killFigure = function(pos, attacker) {
 	var scope = this;
+	var victimSide = attacker.side ? 0 : 1;
 	// search & remove figure from stage
-	this.figures.forEach(function(item, index) {
+	this.figures[victimSide].forEach(function(item, index) {
 		var itemPos = scope.chessboard.getCoordinatesFromPosition(item.shape.x, item.shape.y);
 		if (pos.x == itemPos.x && pos.y == itemPos.y && attacker != item) {
 			scope.stage.removeChild(item.shape);
-			scope.figures.splice(index, 1);
-			// todo: do something with dead figures
+			scope.figures[victimSide].splice(index, 1);
+			// todo: do something with dead pieces
 			return true;
 		}
 	});
