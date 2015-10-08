@@ -1,21 +1,21 @@
 /**
- * Figure
+ * Piece
  *
  * Parent class for individual pieces
  *
  * @author Daniel Milenkovic
  */
-function Figure(side) {
+function Piece(side) {
 	this.side = side;
 	this.images = ["", ""];
 }
 
-Figure.prototype.init = function(pos, global) {
+Piece.prototype.init = function(pos, global) {
 	var shape = new createjs.Bitmap(this.getImage());
-	
+
 	// todo: clean me up!
 	this.shape = shape;
-	var figure = this;
+	var piece = this;
 
 	// update stage after image has loaded
 	shape.image.onload = function() {
@@ -31,19 +31,19 @@ Figure.prototype.init = function(pos, global) {
 	// set initial position
 	shape.x = shape.originX = pos.x;
 	shape.y = shape.originY = pos.y;
-	
+
 	// change cursor
 	shape.on("mouseover", function() {
-		if (global.currentTurn == figure.side) {
+		if (global.currentTurn == piece.side) {
 			shape.cursor = 'pointer';
 		} else {
 			shape.cursor = 'default';
 		}
 	});
-	
+
 	// make draggable
 	shape.on("pressmove", function(event) {
-		if (global.currentTurn == figure.side) {
+		if (global.currentTurn == piece.side) {
 			// include a small offset, so it stays with the cursor
 			event.target.x = event.stageX - (shape.image.width / 2);
 			event.target.y = event.stageY - (shape.image.height / 2);
@@ -55,24 +55,24 @@ Figure.prototype.init = function(pos, global) {
 		}
 	});
 
-	// make move after figure has been dropped
+	// make move after piece has been dropped
 	shape.on("pressup", function(evt) {
 		var coords = global.chessboard.getCoordinatesFromPosition(evt.target.x, evt.target.y);
-		global.makeMove(coords, figure, false);
+		global.makeMove(coords, piece, false);
 	});
 
 	global.stage.addChild(shape);
 }
 
-Figure.prototype.getImage = function() {
+Piece.prototype.getImage = function() {
 	return this.images[this.side]
 }
 
-Figure.prototype.setImages = function(images) {
+Piece.prototype.setImages = function(images) {
 	this.images = images;
 }
 
-Figure.prototype.isJumping = function(oldPos, newPos, board) {
+Piece.prototype.isJumping = function(oldPos, newPos, board) {
 	var xOperator = oldPos.x < newPos.x ? 1 : -1,
 		yOperator = oldPos.y < newPos.y ? 1 : -1,
 
@@ -89,26 +89,28 @@ Figure.prototype.isJumping = function(oldPos, newPos, board) {
 	}
 
 	if (diffX > 0) {
+		// check for obstacles horizontal and diagonal
 		for (var i = oldPos.x + xOperator;
 			(i < newPos.x && xOperator > 0) ||
 			(i > newPos.x && xOperator < 0); i += xOperator) {
-				
+
 			currentY += yOperator;
-			if (diagonal && board[currentY][i] > 0) {
+			if (diagonal && board[currentY][i]) {
 				return true;
-			} else if (!diagonal && board[oldPos.y][i] > 0) {
+			} else if (!diagonal && board[oldPos.y][i]) {
 				return true;
 			}
 		}
 	} else {
+		// check for obstacles vertical and diagonal
 		for (var i = oldPos.y + yOperator;
 			(i < newPos.y && yOperator > 0) ||
 			(i > newPos.y && yOperator < 0); i += yOperator) {
 
 			currentX += xOperator;
-			if (diagonal && board[i][currentX] > 0) {
+			if (diagonal && board[i][currentX]) {
 				return true;
-			} else if (!diagonal && board[i][oldPos.x] > 0) {
+			} else if (!diagonal && board[i][oldPos.x]) {
 				return true;
 			}
 		}
@@ -123,11 +125,12 @@ Figure.prototype.isJumping = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-Pawn.prototype = Object.create(Figure.prototype);
+Pawn.prototype = Object.create(Piece.prototype);
 
 function Pawn(side) {
 	this.side = side;
 	this.type = side ? 7 : 6;
+	this.value = 1;
 	this.moved = false;
 	this.images = ["assets/Chess_pdt45.svg", "assets/Chess_plt45.svg"]
 }
@@ -141,7 +144,7 @@ Pawn.prototype.validateMove = function(oldPos, newPos, board) {
 	// check direction
 	if ((this.side === 0 && oldPos.y < newPos.y) || (this.side == 1 && oldPos.y > newPos.y)) {
 		// only forward if no one in front
-		if (diffX === 0 && target == 0) {
+		if (diffX === 0 && target === 0) {
 			// only one step at a time
 			if (diffY == 1) {
 				valid = true;
@@ -149,7 +152,7 @@ Pawn.prototype.validateMove = function(oldPos, newPos, board) {
 			} else if (diffY == 2 && this.moved == false) {
 				valid = true
 			}
-		} else if (diffX == 1 && diffY == 1 && target > 0) {
+		} else if (diffX == 1 && diffY == 1 && target) {
 			// diagonal if there is an enemy
 			valid = true;
 		}
@@ -168,28 +171,28 @@ Pawn.prototype.validateMove = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-Rook.prototype = Object.create(Figure.prototype);
+Rook.prototype = Object.create(Piece.prototype);
 
 function Rook(side) {
 	this.side = side;
 	this.type = side ? 8 : 1;
+	this.value = 2;
 	this.images = ["assets/Chess_rdt45.svg", "assets/Chess_rlt45.svg"]
 }
 
 Rook.prototype.validateMove = function(oldPos, newPos, board) {
 	var diffX = Math.abs(oldPos.x - newPos.x),
 		diffY = Math.abs(oldPos.y - newPos.y),
-		target = board[newPos.y][newPos.x],
 		valid = false;
 
-	// only on axis at a time
+	// only one axis at a time
 	if (diffX === 0 || diffY === 0) {
 		// prevent jumping
 		if (!this.isJumping(oldPos, newPos, board)) {
 			valid = true;
 		}
 	}
-	
+
 	return valid;
 }
 
@@ -198,18 +201,18 @@ Rook.prototype.validateMove = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-Knight.prototype = Object.create(Figure.prototype);
+Knight.prototype = Object.create(Piece.prototype);
 
 function Knight(side) {
 	this.side = side;
 	this.type = side ? 9 : 2;
+	this.value = 2;
 	this.images = ["assets/Chess_ndt45.svg", "assets/Chess_nlt45.svg"]
 }
 
 Knight.prototype.validateMove = function(oldPos, newPos, board) {
 	var diffX = Math.abs(oldPos.x - newPos.x),
 		diffY = Math.abs(oldPos.y - newPos.y),
-		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// 2x1 jump pattern
@@ -225,18 +228,18 @@ Knight.prototype.validateMove = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-Bishop.prototype = Object.create(Figure.prototype);
+Bishop.prototype = Object.create(Piece.prototype);
 
 function Bishop(side) {
 	this.side = side;
 	this.type = side ? 10 : 3;
+	this.value = 3;
 	this.images = ["assets/Chess_bdt45.svg", "assets/Chess_blt45.svg"]
 }
 
 Bishop.prototype.validateMove = function(oldPos, newPos, board) {
 	var diffX = Math.abs(oldPos.x - newPos.x),
 		diffY = Math.abs(oldPos.y - newPos.y),
-		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// diagonal move pattern
@@ -255,11 +258,12 @@ Bishop.prototype.validateMove = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-Queen.prototype = Object.create(Figure.prototype);
+Queen.prototype = Object.create(Piece.prototype);
 
 function Queen(side) {
 	this.side = side;
 	this.type = side ? 11 : 4;
+	this.value = 8;
 	this.images = ["assets/Chess_qdt45.svg", "assets/Chess_qlt45.svg"]
 }
 
@@ -285,11 +289,12 @@ Queen.prototype.validateMove = function(oldPos, newPos, board) {
  *
  * Initialisation and rules
  */
-King.prototype = Object.create(Figure.prototype);
+King.prototype = Object.create(Piece.prototype);
 
 function King(side) {
 	this.side = side;
 	this.type = side ? 12 : 5;
+	this.value = 1000;
 	this.images = ["assets/Chess_kdt45.svg", "assets/Chess_klt45.svg"]
 }
 
