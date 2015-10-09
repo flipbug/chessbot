@@ -10,15 +10,50 @@ function Chessboard(x, y) {
 	this.startY = y;
 
 	// create the 8x8 chessboard with the initial setup
-	// todo: save the objects directly inside the matrix
-	this.board[0] = [new Rook(0), new Knight(0), new Bishop(0), new Queen(0), new Knight(0), new Bishop(0), new Knight(0), new Rook(0)];
-	this.board[1] = [new Pawn(0), new Pawn(0), new Pawn(0), new Pawn(0), new Pawn(0), new Pawn(0), new Pawn(0), new Pawn(0)];
+	this.board[0] = [
+		new Rook(0),
+		new Knight(0),
+		new Bishop(0),
+		new Queen(0),
+		new King(0),
+		new Bishop(0),
+		new Knight(0),
+		new Rook(0)
+	];
+	this.board[1] = [
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0),
+		new Pawn(0)
+	];
 	this.board[2] = [0, 0, 0, 0, 0, 0, 0, 0];
 	this.board[3] = [0, 0, 0, 0, 0, 0, 0, 0];
 	this.board[4] = [0, 0, 0, 0, 0, 0, 0, 0];
 	this.board[5] = [0, 0, 0, 0, 0, 0, 0, 0];
-	this.board[6] = [new Pawn(1), new Pawn(1), new Pawn(1), new Pawn(1), new Pawn(1), new Pawn(1), new Pawn(1), new Pawn(1)];
-	this.board[7] = [new Rook(1), new Knight(1), new Bishop(1), new Queen(1), new Knight(1), new Bishop(1), new Knight(1), new Rook(1)];
+	this.board[6] = [
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1),
+		new Pawn(1)
+	];
+	this.board[7] = [
+		new Rook(1),
+		new Knight(1),
+		new Bishop(1),
+		new Queen(1),
+		new King(1),
+		new Bishop(1),
+		new Knight(1),
+		new Rook(1)
+	];
 }
 
 Chessboard.prototype.draw = function(stage, dimension) {

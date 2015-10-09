@@ -51,9 +51,9 @@ Chess.prototype.initPiecePlacement = function() {
 		for (var j = 0; j < row.length; j++) {
 			// get piece and draw it
 			var piece = board[i][j];
-			if (piece instanceof Object) {
-				var pos = this.chessboard.getPositionFromCoordinates(j, i);
-				piece.init(pos, this);
+			if (piece instanceof Piece) {
+				var pixelPos = this.chessboard.getPositionFromCoordinates(j, i);
+				piece.init({x: j, y: i}, pixelPos, this);
 				// store piece
 				this.pieces[piece.side].push(piece);
 			}
@@ -62,28 +62,30 @@ Chess.prototype.initPiecePlacement = function() {
 }
 
 Chess.prototype.makeMove = function(coords, piece) {
-	// get old coordinates
-	var oldCoords = this.chessboard.getCoordinatesFromPosition(piece.shape.originX, piece.shape.originY);
-
-	var moveValid = this.checkMove(oldCoords, coords, piece);
-	if (moveValid) {
+	if (this.checkMove(coords, piece)) {
 		// kill enemy if there is one
 		var target = this.chessboard.board[coords.y][coords.x];
-		if (target > 0) {
+		if (target instanceof Piece) {
 			this.killPiece(coords, piece);
 		}
 
 		// snap into tile
-		var pos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
-		piece.shape.x = pos.x;
-		piece.shape.y = pos.y;
+		var pixelPos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
+		piece.shape.x = pixelPos.x;
+		piece.shape.y = pixelPos.y;
 
 		// update chessboard matrix
-		this.chessboard.board[oldCoords.y][oldCoords.x] = 0;
+		this.chessboard.board[piece.y][piece.x] = 0;
 		this.chessboard.board[coords.y][coords.x] = piece;
+
+		piece.x = coords.x;
+		piece.y = coords.y;
 
 		piece.shape.originX = piece.shape.x;
 		piece.shape.originY = piece.shape.y;
+
+		// update stage before next move
+		this.stage.update();
 
 		// next turn
 		this.currentTurn = 1 - this.currentTurn;
@@ -99,26 +101,25 @@ Chess.prototype.makeMove = function(coords, piece) {
 		return false;
 	}
 
-	this.stage.update();
 	return true;
 }
 
-Chess.prototype.checkMove = function(oldPos, newPos, piece) {
+Chess.prototype.checkMove = function(newPos, piece) {
 	// check if move is inside the board
 	if (newPos.x >= this.chessboard.board.length || newPos.x < 0 || newPos.y >= this.chessboard.board.length || newPos.y < 0) {
 		return false;
 	}
 
 	// check if move was valid
-	if (!piece.validateMove(oldPos, newPos, this.chessboard.board)) {
+	if (!piece.validateMove(newPos, this.chessboard.board)) {
 		return false;
 	}
 
 	// if place is already occupied
 	var target = this.chessboard.board[newPos.y][newPos.x];
-	if (target > 0) {
+	if (target instanceof Piece) {
 		// check if place is occupied by an ally
-		if (piece.side !== target.side) {
+		if (piece.side === target.side) {
 			return false
 		}
 	}

@@ -7,9 +7,9 @@
  */
 function Bot(side, difficulty) {
 	this.side = side;
-	// difficulty goes from 1 to 3 (todo)
+	// todo: difficulty
 	this.difficulty = difficulty;
-	this.depthLimit = 1;
+	this.depthLimit = 5;
 }
 
 Bot.prototype.init = function(chess) {
@@ -21,7 +21,7 @@ Bot.prototype.init = function(chess) {
 Bot.prototype.makeMove = function() {
 	var possibleMoves = this.getPossibleMoves(this.side);
 
-	var gameTree = this.generateGameTree(this.side, this.pieces, this.board, this.depthLimit);
+	var gameTree = this.generateGameTree(this.side, this.pieces, this.board, 0);
 	console.log(gameTree);
 	// var move = evaluateBestMove(gameTree);
 
@@ -53,7 +53,7 @@ Bot.prototype.getPossibleMoves = function(side, board, depth) {
 			for (var j = 0; j < row.length; j++) {
 				var newMove = {x: j, y: i, value: 0, nextMoves: []};
 				// validate move
-				if (newMove != oldPos && scope.chess.checkMove(oldPos, newMove, piece)) {
+				if (newMove != oldPos && scope.chess.checkMove(newMove, piece)) {
 					newMove.value = scope.evaluateMove(newMove);
 					newMove
 					moves.push(newMove);
@@ -95,20 +95,18 @@ Bot.prototype.generateGameTree = function(side, pieces, board, currentDepth) {
 
 	// get possible moves for every piece of current player
 	pieces[side].forEach(function(piece, index) {
-		var moves = [],
-			oldPos = scope.chess.chessboard.getCoordinatesFromPosition(piece.shape.x, piece.shape.y);
-
+		var moves = [];
 		// iterate through every field to check if possible move
 		for (var i = 0; i < scope.board.length; i++) {
 			var row = scope.board[i];
 			for (var j = 0; j < row.length; j++) {
 				var newMove = {x: j, y: i, value: 0, nextMoves: []};
 				// validate move
-				if (newMove.x != oldPos.x && newMove.y != oldPos.y && scope.chess.checkMove(oldPos, newMove, piece)) {
-					var tempState = scope.simulateMove(newMove, oldPos,piece, pieces, board);
+				if (newMove.x != piece.x && newMove.y != piece.y && scope.chess.checkMove(newMove, piece)) {
+					var tempState = scope.simulateMove(newMove, piece, pieces, board);
 					newMove.value = tempState.value;
-					// iterate into the future until depth limit
-					scope.generateGameTree(1 - side, tempState.pieces, tempState.board, currentDepth++);
+					// iterate into the future until depth limit is reached
+					newMove.nextMoves = scope.generateGameTree(1 - side, tempState.pieces, tempState.board, ++currentDepth);
 					moves.push(newMove);
 				}
 			}
@@ -134,7 +132,7 @@ Bot.prototype.generateGameTree = function(side, pieces, board, currentDepth) {
  * @param  {array} board
  * @return {Object}
  */
-Bot.prototype.simulateMove = function(coords, oldCoords, piece, pieces, board) {
+Bot.prototype.simulateMove = function(coords, piece, pieces, board) {
 			var value = 0;
 			var target = board[coords.y][coords.x];
 			if (target) {
@@ -142,8 +140,11 @@ Bot.prototype.simulateMove = function(coords, oldCoords, piece, pieces, board) {
 			}
 
 			// update chessboard matrix
-			board[oldCoords.y][oldCoords.x] = 0;
+			board[piece.y][piece.x] = 0;
 			board[coords.y][coords.x] = piece;
+
+			piece.x = coords.x;
+			piece.y = coords.y;
 
 			return {
 				value: value,

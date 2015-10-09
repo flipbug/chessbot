@@ -1,22 +1,42 @@
 /**
- * Piece
- *
  * Parent class for individual pieces
  *
  * @author Daniel Milenkovic
+ * @param {int} side
  */
 function Piece(side) {
 	this.side = side;
 	this.images = ["", ""];
 }
 
-Piece.prototype.init = function(pos, global) {
-	var shape = new createjs.Bitmap(this.getImage());
+/**
+ * Initialize a chess piece
+ *
+ * @param  {Object} coords
+ * @param  {Object} pixelPos
+ * @param  {Chess} globalScope
+ */
+Piece.prototype.init = function(coords, pixelPos, globalScope) {
+	this.shape = new createjs.Bitmap(this.getImage());
 
-	// todo: clean me up!
-	this.shape = shape;
-	var piece = this;
+	// set initial position
+	this.shape.x = this.shape.originX = pixelPos.x;
+	this.shape.y = this.shape.originY = pixelPos.y;
 
+	this.x = coords.x;
+	this.y = coords.y;
+
+	this.loadImage(globalScope);
+	this.makeDraggable(globalScope);
+}
+
+/**
+ * Load the image and display it afterwards
+ *
+ * @param  {Chess} global
+ */
+Piece.prototype.loadImage = function(global) {
+	var shape = this.shape;
 	// update stage after image has loaded
 	shape.image.onload = function() {
 
@@ -27,14 +47,20 @@ Piece.prototype.init = function(pos, global) {
 
 		global.stage.update();
 	}
+}
 
-	// set initial position
-	shape.x = shape.originX = pos.x;
-	shape.y = shape.originY = pos.y;
+/**
+ * Make the piece draggable
+ *
+ * @param  {Chess} global
+ */
+Piece.prototype.makeDraggable = function(global) {
+	var shape = this.shape,
+			parentScope = this;
 
 	// change cursor
-	shape.on("mouseover", function() {
-		if (global.currentTurn == piece.side) {
+	this.shape.on("mouseover", function() {
+		if (global.currentTurn == parentScope.side) {
 			shape.cursor = 'pointer';
 		} else {
 			shape.cursor = 'default';
@@ -42,8 +68,8 @@ Piece.prototype.init = function(pos, global) {
 	});
 
 	// make draggable
-	shape.on("pressmove", function(event) {
-		if (global.currentTurn == piece.side) {
+	this.shape.on("pressmove", function(event) {
+		if (global.currentTurn == parentScope.side) {
 			// include a small offset, so it stays with the cursor
 			event.target.x = event.stageX - (shape.image.width / 2);
 			event.target.y = event.stageY - (shape.image.height / 2);
@@ -56,31 +82,30 @@ Piece.prototype.init = function(pos, global) {
 	});
 
 	// make move after piece has been dropped
-	shape.on("pressup", function(evt) {
+	this.shape.on("pressup", function(evt) {
 		var coords = global.chessboard.getCoordinatesFromPosition(evt.target.x, evt.target.y);
-		global.makeMove(coords, piece, false);
+		global.makeMove(coords, parentScope, false);
 	});
 
 	global.stage.addChild(shape);
 }
 
-Piece.prototype.getImage = function() {
-	return this.images[this.side]
-}
+/**
+ * Check if piece is jumping over other pieces
+ *
+ * @param  {Object} newPos
+ * @param  {array} board
+ * @return {bool}
+ */
+Piece.prototype.isJumping = function(newPos, board) {
+	var xOperator = this.x < newPos.x ? 1 : -1,
+		yOperator = this.y < newPos.y ? 1 : -1,
 
-Piece.prototype.setImages = function(images) {
-	this.images = images;
-}
+		diffX = Math.abs(this.x - this.x),
+		diffY = Math.abs(this.y - this.y),
 
-Piece.prototype.isJumping = function(oldPos, newPos, board) {
-	var xOperator = oldPos.x < newPos.x ? 1 : -1,
-		yOperator = oldPos.y < newPos.y ? 1 : -1,
-
-		diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
-
-		currentY = oldPos.y,
-		currentX = oldPos.x,
+		currentY = this.y,
+		currentX = this.x,
 
 		diagonal = false;
 
@@ -90,33 +115,49 @@ Piece.prototype.isJumping = function(oldPos, newPos, board) {
 
 	if (diffX > 0) {
 		// check for obstacles horizontal and diagonal
-		for (var i = oldPos.x + xOperator;
+		for (var i = this.x + xOperator;
 			(i < newPos.x && xOperator > 0) ||
 			(i > newPos.x && xOperator < 0); i += xOperator) {
 
 			currentY += yOperator;
-			if (diagonal && board[currentY][i]) {
+			if (diagonal && board[currentY][i] instanceof Piece) {
 				return true;
-			} else if (!diagonal && board[oldPos.y][i]) {
+			} else if (!diagonal && board[this.y][i] instanceof Piece) {
 				return true;
 			}
 		}
 	} else {
 		// check for obstacles vertical and diagonal
-		for (var i = oldPos.y + yOperator;
+		for (var i = this.y + yOperator;
 			(i < newPos.y && yOperator > 0) ||
 			(i > newPos.y && yOperator < 0); i += yOperator) {
 
 			currentX += xOperator;
-			if (diagonal && board[i][currentX]) {
+			if (diagonal && board[i][currentX] instanceof Piece) {
 				return true;
-			} else if (!diagonal && board[i][oldPos.x]) {
+			} else if (!diagonal && board[i][this.x] instanceof Piece) {
 				return true;
 			}
 		}
 	}
 
 	return false;
+}
+
+/**
+ * Get image for its side
+ *
+ * @return {array}
+ */
+Piece.prototype.getImage = function() {
+	return this.images[this.side]
+}
+
+/**
+ * Setter for images
+ */
+Piece.prototype.setImages = function(images) {
+	this.images = images;
 }
 
 
@@ -135,14 +176,14 @@ function Pawn(side) {
 	this.images = ["assets/Chess_pdt45.svg", "assets/Chess_plt45.svg"]
 }
 
-Pawn.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+Pawn.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// check direction
-	if ((this.side === 0 && oldPos.y < newPos.y) || (this.side == 1 && oldPos.y > newPos.y)) {
+	if ((this.side === 0 && this.y < newPos.y) || (this.side == 1 && this.y > newPos.y)) {
 		// only forward if no one in front
 		if (diffX === 0 && target === 0) {
 			// only one step at a time
@@ -152,7 +193,7 @@ Pawn.prototype.validateMove = function(oldPos, newPos, board) {
 			} else if (diffY == 2 && this.moved == false) {
 				valid = true
 			}
-		} else if (diffX == 1 && diffY == 1 && target) {
+		} else if (diffX == 1 && diffY == 1 && target instanceof Piece) {
 			// diagonal if there is an enemy
 			valid = true;
 		}
@@ -180,15 +221,15 @@ function Rook(side) {
 	this.images = ["assets/Chess_rdt45.svg", "assets/Chess_rlt45.svg"]
 }
 
-Rook.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+Rook.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		valid = false;
 
 	// only one axis at a time
 	if (diffX === 0 || diffY === 0) {
 		// prevent jumping
-		if (!this.isJumping(oldPos, newPos, board)) {
+		if (!this.isJumping(newPos, board)) {
 			valid = true;
 		}
 	}
@@ -210,9 +251,9 @@ function Knight(side) {
 	this.images = ["assets/Chess_ndt45.svg", "assets/Chess_nlt45.svg"]
 }
 
-Knight.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+Knight.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		valid = false;
 
 	// 2x1 jump pattern
@@ -237,15 +278,15 @@ function Bishop(side) {
 	this.images = ["assets/Chess_bdt45.svg", "assets/Chess_blt45.svg"]
 }
 
-Bishop.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+Bishop.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		valid = false;
 
 	// diagonal move pattern
 	if (diffX == diffY) {
 		// prevent jumping
-		if (!this.isJumping(oldPos, newPos, board)) {
+		if (!this.isJumping(newPos, board)) {
 			valid = true;
 		}
 	}
@@ -267,16 +308,16 @@ function Queen(side) {
 	this.images = ["assets/Chess_qdt45.svg", "assets/Chess_qlt45.svg"]
 }
 
-Queen.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+Queen.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// diagonal or straight move pattern
 	if (diffX == diffY || diffX === 0 || diffY === 0) {
 		// prevent jumping
-		if (!this.isJumping(oldPos, newPos, board)) {
+		if (!this.isJumping(newPos, board)) {
 			valid = true;
 		}
 	}
@@ -298,9 +339,9 @@ function King(side) {
 	this.images = ["assets/Chess_kdt45.svg", "assets/Chess_klt45.svg"]
 }
 
-King.prototype.validateMove = function(oldPos, newPos, board) {
-	var diffX = Math.abs(oldPos.x - newPos.x),
-		diffY = Math.abs(oldPos.y - newPos.y),
+King.prototype.validateMove = function(newPos, board) {
+	var diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 		target = board[newPos.y][newPos.x],
 		valid = false;
 
