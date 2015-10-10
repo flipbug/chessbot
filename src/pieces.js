@@ -101,8 +101,8 @@ Piece.prototype.isJumping = function(newPos, board) {
 	var xOperator = this.x < newPos.x ? 1 : -1,
 		yOperator = this.y < newPos.y ? 1 : -1,
 
-		diffX = Math.abs(this.x - this.x),
-		diffY = Math.abs(this.y - this.y),
+		diffX = Math.abs(this.x - newPos.x),
+		diffY = Math.abs(this.y - newPos.y),
 
 		currentY = this.y,
 		currentX = this.x,

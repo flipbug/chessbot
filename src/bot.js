@@ -4,6 +4,8 @@
  * The ultimate chessbot!
  *
  * @author Daniel Milenkovic
+ * @param {int} side
+ * @param {int} difficulty
  */
 function Bot(side, difficulty) {
 	this.side = side;
@@ -12,16 +14,32 @@ function Bot(side, difficulty) {
 	this.depthLimit = 5;
 }
 
+/**
+ * Initialize bot
+ *
+ * @param  {Chess} chess
+ */
 Bot.prototype.init = function(chess) {
 	this.chess = chess;
+
+	// reference to chessboard and pieces
 	this.board = chess.chessboard.board;
-	this.pieces = this.chess.pieces;
+	this.pieces = chess.pieces;
 }
 
+/**
+ * Make a move
+ *
+ * @return {boolean}
+ */
 Bot.prototype.makeMove = function() {
 	var possibleMoves = this.getPossibleMoves(this.side);
 
-	var gameTree = this.generateGameTree(this.side, this.pieces, this.board, 0);
+	// clone the chessboard and pieces for simulation
+	var simBoard = clone(this.board),
+			simPieces = clone(this.pieces);
+	var gameTree = this.generateGameTree(this.side, simPieces, simBoard, 0);
+
 	console.log(gameTree);
 	// var move = evaluateBestMove(gameTree);
 
@@ -45,7 +63,7 @@ Bot.prototype.getPossibleMoves = function(side, board, depth) {
 
 	this.pieces[side].forEach(function(piece, index) {
 		var moves = [],
-			oldPos = scope.chess.chessboard.getCoordinatesFromPosition(piece.shape.x, piece.shape.y);
+			oldPos = {x: piece.x, y: piece.y};
 
 		// iterate through every field to check if possible move
 		for (var i = 0; i < scope.board.length; i++) {
@@ -55,7 +73,6 @@ Bot.prototype.getPossibleMoves = function(side, board, depth) {
 				// validate move
 				if (newMove != oldPos && scope.chess.checkMove(newMove, piece)) {
 					newMove.value = scope.evaluateMove(newMove);
-					newMove
 					moves.push(newMove);
 				}
 			}
