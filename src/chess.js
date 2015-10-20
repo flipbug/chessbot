@@ -62,7 +62,7 @@ Chess.prototype.initPiecePlacement = function() {
 }
 
 Chess.prototype.makeMove = function(coords, piece) {
-	if (this.checkMove(coords, piece)) {
+	if (this.checkMove(coords, piece, this.chessboard.board)) {
 		// kill enemy if there is one
 		var target = this.chessboard.board[coords.y][coords.x];
 		if (target instanceof Piece) {
@@ -104,19 +104,24 @@ Chess.prototype.makeMove = function(coords, piece) {
 	return true;
 }
 
-Chess.prototype.checkMove = function(newPos, piece) {
+Chess.prototype.checkMove = function(newPos, piece, board) {
+	// check if piece was moved
+	if (newPos.x == piece.x && newPos.y == piece.y) {
+		return false;
+	}
+
 	// check if move is inside the board
-	if (newPos.x >= this.chessboard.board.length || newPos.x < 0 || newPos.y >= this.chessboard.board.length || newPos.y < 0) {
+	if (newPos.x >= board.length || newPos.x < 0 || newPos.y >= board.length || newPos.y < 0) {
 		return false;
 	}
 
 	// check if move was valid
-	if (!piece.validateMove(newPos, this.chessboard.board)) {
+	if (!piece.validateMove(newPos, board)) {
 		return false;
 	}
 
 	// if place is already occupied
-	var target = this.chessboard.board[newPos.y][newPos.x];
+	var target = board[newPos.y][newPos.x];
 	if (target instanceof Piece) {
 		// check if place is occupied by an ally
 		if (piece.side === target.side) {

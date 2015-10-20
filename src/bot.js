@@ -11,7 +11,7 @@ function Bot(side, difficulty) {
 	this.side = side;
 	// todo: difficulty
 	this.difficulty = difficulty;
-	this.depthLimit = 5;
+	this.depthLimit = 2;
 }
 
 /**
@@ -33,13 +33,8 @@ Bot.prototype.init = function(chess) {
  * @return {boolean}
  */
 Bot.prototype.makeMove = function() {
-	var possibleMoves = this.getPossibleMoves(this.side);
-
-	// clone the chessboard and pieces for simulation
-	var simBoard = clone(this.board),
-			simPieces = clone(this.pieces);
-	var gameTree = this.generateGameTree(this.side, simPieces, simBoard, 0);
-
+	var possibleMoves = this.getPossibleMoves(this.side, this.board, 0);
+	var gameTree = this.generateGameTree(this.side, this.pieces, this.board, 0);
 	console.log(gameTree);
 	// var move = evaluateBestMove(gameTree);
 
@@ -55,7 +50,7 @@ Bot.prototype.makeMove = function() {
 }
 
 /**
- * soon to be removed
+ * obsolete as soon as the method gameTree is functional
  */
 Bot.prototype.getPossibleMoves = function(side, board, depth) {
 	var scope = this,
@@ -71,7 +66,7 @@ Bot.prototype.getPossibleMoves = function(side, board, depth) {
 			for (var j = 0; j < row.length; j++) {
 				var newMove = {x: j, y: i, value: 0, nextMoves: []};
 				// validate move
-				if (newMove != oldPos && scope.chess.checkMove(newMove, piece)) {
+				if (newMove != oldPos && scope.chess.checkMove(newMove, piece, scope.board)) {
 					newMove.value = scope.evaluateMove(newMove);
 					moves.push(newMove);
 				}
@@ -105,25 +100,29 @@ Bot.prototype.generateGameTree = function(side, pieces, board, currentDepth) {
 	var scope = this,
 		possibleMoves = [];
 
-	// return if depth limit was reached
 	if (currentDepth > this.depthLimit) {
 		return null;
 	}
 
+	// clone the chessboard and pieces for simulation, because
+	// each evaluation should be independent from the others.
+	var simBoard = clone(board),
+			simPieces = clone(pieces);
+
 	// get possible moves for every piece of current player
-	pieces[side].forEach(function(piece, index) {
+	simPieces[side].forEach(function(piece, index) {
 		var moves = [];
 		// iterate through every field to check if possible move
-		for (var i = 0; i < scope.board.length; i++) {
-			var row = scope.board[i];
+		for (var i = 0; i < simBoard.length; i++) {
+			var row = simBoard[i];
 			for (var j = 0; j < row.length; j++) {
 				var newMove = {x: j, y: i, value: 0, nextMoves: []};
-				// validate move
-				if (newMove.x != piece.x && newMove.y != piece.y && scope.chess.checkMove(newMove, piece)) {
-					var tempState = scope.simulateMove(newMove, piece, pieces, board);
+				// check if valid move and generate the following moves
+				if (scope.chess.checkMove(newMove, piece, simBoard)) {
+					var tempState = scope.simulateMove(newMove, piece, simPieces, simBoard);
 					newMove.value = tempState.value;
 					// iterate into the future until depth limit is reached
-					newMove.nextMoves = scope.generateGameTree(1 - side, tempState.pieces, tempState.board, ++currentDepth);
+					newMove.nextMoves = scope.generateGameTree(1 - side, tempState.pieces, tempState.board, currentDepth + 1);
 					moves.push(newMove);
 				}
 			}
