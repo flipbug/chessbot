@@ -118,8 +118,8 @@ function clone(parent, circular, depth, prototype) {
         continue;
       }
 
-      // small hack to prevent errors from clonig easeljs shapes...
-      // todo: find a better solution
+      // ugly hack to prevent errors from clonig easeljs shapes...
+      // todo: find a clean solution!
       if (i != "shape") {
         child[i] = _clone(parent[i], depth - 1);
       }

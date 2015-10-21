@@ -3,9 +3,22 @@
 	<head>
 		<title>Game of Chess</title>
 		<script src="lib/easeljs-0.8.1.min.js"></script>
-		<script src="src/clone.js"></script>
+
+		<script src="src/utility/constants.js"></script>
+		<script src="src/utility/globals.js"></script>
+		<script src="src/utility/vector.js"></script>
+		<script src="src/utility/clone.js"></script>
+
 		<script src="src/bot.js"></script>
-		<script src="src/pieces.js"></script>
+		<script src="src/piece.js"></script>
+
+		<script src="src/pieces/pawn.js"></script>
+		<script src="src/pieces/rook.js"></script>
+		<script src="src/pieces/bishop.js"></script>
+		<script src="src/pieces/knight.js"></script>
+		<script src="src/pieces/queen.js"></script>
+		<script src="src/pieces/king.js"></script>
+
 		<script src="src/chessboard.js"></script>
 		<script src="src/chess.js"></script>
 		<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
@@ -17,7 +30,7 @@
 		<canvas id="canvas" width="540" height="540"></canvas>
 		<script>
 			var canvas = document.getElementById("canvas");
-			var chess = new Chess(canvas, 45);
+			var chess = new Chess(canvas);
 			chess.start();
 		</script>
 	</body>

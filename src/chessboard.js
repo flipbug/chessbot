@@ -3,11 +3,11 @@
  *
  * @author Daniel Milenkovic
  */
-function Chessboard(x, y) {
+function Chessboard() {
 	this.board = [];
-	this.dimension = 60;
-	this.startX = x;
-	this.startY = y;
+	this.dimension = BOARD.SIZE_RECTANGLE;
+	this.startX = BOARD.OFFSET_X;
+	this.startY = BOARD.OFFSET_Y;
 
 	// create the 8x8 chessboard with the initial setup
 	this.board[0] = [
@@ -56,13 +56,11 @@ function Chessboard(x, y) {
 	];
 }
 
-Chessboard.prototype.draw = function(stage, dimension) {
+Chessboard.prototype.draw = function(stage) {
 	var xPos = this.startX,
 		yPos = this.startY,
-		firstColor = "#E5C4A0",
-		secondColor = "#756452";
-
-	this.dimension = dimension;
+		firstColor = BOARD.PRIMARY_COLOR,
+		secondColor = BOARD.SECONDARY_COLOR;
 
 	for (var i = 0; i < this.board.length; i++) {
 		var row = this.board[i];
@@ -76,24 +74,38 @@ Chessboard.prototype.draw = function(stage, dimension) {
 			}
 			rect.graphics.drawRect(xPos, yPos, this.dimension, this.dimension);
 			stage.addChild(rect);
-			xPos += dimension;
+			xPos += this.dimension;
 		}
-		yPos += dimension;
+		yPos += this.dimension;
 	}
 }
 
-Chessboard.prototype.getPositionFromCoordinates = function(x, y) {
-	return {
-		'x': x * this.dimension + this.startX,
-		'y': y * this.dimension + this.startY
-	};
+Chessboard.prototype.initPieces = function(stage) {
+	var pieces = [[],[]];
+	for (var i = 0; i < this.board.length; i++) {
+		var row = this.board[i];
+		for (var j = 0; j < row.length; j++) {
+			var piece = this.board[i][j];
+			if (piece instanceof Piece) {
+				piece.init(new Vector(j,i), stage);
+				pieces[piece.side].push(piece);
+			}
+		}
+	}
+	return pieces;
 }
 
-Chessboard.prototype.getCoordinatesFromPosition = function(x, y) {
-	return {
-		'x': Math.round((x - this.startX) / this.dimension),
-		'y': Math.round((y - this.startY) / this.dimension)
-	};
+Chessboard.prototype.updateBoard = function(newPos, piece) {
+	this.board[piece.y][piece.x] = 0;
+	this.board[newPos.y][newPos.x] = piece;
+}
+
+Chessboard.prototype.isPieceOnPosition = function(pos) {
+	var target = this.board[pos.y][pos.x];
+	if (target instanceof Piece) {
+		return true;
+	}
+	return false;
 }
 
 Chessboard.prototype.getBoard = function() {

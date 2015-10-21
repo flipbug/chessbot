@@ -1,112 +1,83 @@
 /**
- * Chess
- *
  * Contains the main logic of the game
  *
  * @author Daniel Milenkovic
  */
-function Chess(canvas, dimension) {
-
+function Chess(canvas) {
 	this.context = canvas.getContext("2d");
-	this.dimension = dimension;
-	this.offsetX = 90;
-	this.offsetY = 0;
+	this.canvas = canvas;
 
-	// store each piece in an array
 	this.pieces = [[],[]];
+	this.initEaselJs();
+}
 
-	// white begins
-	this.currentTurn = 1;
-	this.bot = new Bot(0, 2);
-
-	// init easel.js
-	this.stage = new createjs.Stage(canvas);
+Chess.prototype.initEaselJs = function() {
+	this.stage = new createjs.Stage(this.canvas);
 	this.stage.enableMouseOver();
 	this.stage.mouseMoveOutside = true;
 
-	// conifgure ticker to use requestAnimationFrame
-	// createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
-	// createjs.Ticker.setFPS(10);
-
+	createjs.Ticker.setFPS(10);
 	createjs.Touch.enable(this.stage);
 }
 
 Chess.prototype.start = function() {
-	this.chessboard = new Chessboard(this.offsetX, this.offsetY);
-	this.chessboard.draw(this.stage, this.dimension);
-	this.initPiecePlacement();
-	this.update();
+	this.chessboard = new Chessboard();
+	this.chessboard.draw(this.stage);
+	this.pieces = this.chessboard.initPieces(this.stage);
 
+	global.currentTurn = PIECES.WHITE;
+	this.bot = new Bot(PIECES.BLACK, DIFFICULTY.MEDIUM);
 	this.bot.init(this);
+
+	this.listenToPieces();
+	this.startGameLoop();
+}
+
+Chess.prototype.listenToPieces = function() {
+	var scope = this;
+	window.addEventListener(EVENT.PIECE_MOVED, function(e) {
+		console.log(e);
+		scope.makeMove(e.detail.newPos, e.detail.piece);
+	});
+}
+
+Chess.prototype.startGameLoop = function() {
+	var scope = this;
+	createjs.Ticker.addEventListener(EVENT.TICK, function() {
+		scope.update();
+	});
 }
 
 Chess.prototype.update = function() {
 	this.stage.update();
 }
 
-Chess.prototype.initPiecePlacement = function() {
-	var board = this.chessboard.getBoard();
-	for (var i = 0; i < board.length; i++) {
-		var row = board[i];
-		for (var j = 0; j < row.length; j++) {
-			// get piece and draw it
-			var piece = board[i][j];
-			if (piece instanceof Piece) {
-				var pixelPos = this.chessboard.getPositionFromCoordinates(j, i);
-				piece.init({x: j, y: i}, pixelPos, this);
-				// store piece
-				this.pieces[piece.side].push(piece);
-			}
+Chess.prototype.makeMove = function(newPos, piece) {
+	if (this.checkMove(newPos, piece, this.chessboard.board)) {
+		if (this.chessboard.isPieceOnPosition(newPos)) {
+			this.killPiece(newPos, piece);
 		}
-	}
-}
-
-Chess.prototype.makeMove = function(coords, piece) {
-	if (this.checkMove(coords, piece, this.chessboard.board)) {
-		// kill enemy if there is one
-		var target = this.chessboard.board[coords.y][coords.x];
-		if (target instanceof Piece) {
-			this.killPiece(coords, piece);
-		}
-
-		// snap into tile
-		var pixelPos = this.chessboard.getPositionFromCoordinates(coords.x, coords.y);
-		piece.shape.x = pixelPos.x;
-		piece.shape.y = pixelPos.y;
-
-		// update chessboard matrix
-		this.chessboard.board[piece.y][piece.x] = 0;
-		this.chessboard.board[coords.y][coords.x] = piece;
-
-		piece.x = coords.x;
-		piece.y = coords.y;
-
-		piece.shape.originX = piece.shape.x;
-		piece.shape.originY = piece.shape.y;
-
-		// update stage before next move
-		this.stage.update();
-
-		// next turn
-		this.currentTurn = 1 - this.currentTurn;
-		if (this.currentTurn === this.bot.side) {
-			this.bot.makeMove();
-		}
+		this.chessboard.updateBoard(newPos, piece);
+		this.nextTurn();
 	} else {
-		// revert to previous position
-		piece.shape.x = piece.shape.originX;
-		piece.shape.y = piece.shape.originY;
-
-		this.stage.update();
+		piece.resetPosition();
 		return false;
 	}
 
 	return true;
 }
 
+Chess.prototype.nextTurn = function() {
+	global.currentTurn = 1 - global.currentTurn;
+	if (global.currentTurn === this.bot.side) {
+		this.bot.makeMove();
+	}
+}
+
 Chess.prototype.checkMove = function(newPos, piece, board) {
-	// check if piece was moved
-	if (newPos.x == piece.x && newPos.y == piece.y) {
+	// check if piece was actually moved
+	var oldPos = piece.position;
+	if (newPos.x == oldPos.x && newPos.y == oldPos.y) {
 		return false;
 	}
 
