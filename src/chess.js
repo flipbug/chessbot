@@ -25,10 +25,9 @@ Chess.prototype.start = function() {
 	this.pieces = this.chessboard.initPieces(this.stage);
 
 	global.currentTurn = PIECES.WHITE;
-	this.bot = new Bot(PIECES.BLACK, DIFFICULTY.MEDIUM);
-	this.bot.init(this.chessboard.board, this.pieces);
+	this.bot = new Bot(PIECES.BLACK, DIFFICULTY.MEDIUM, this.chessboard.board, this.pieces);
 
-	this.bot.enabled = 0;
+	this.bot.enabled = 1;
 
 	this.listenToPieces();
 	this.startGameLoop();
