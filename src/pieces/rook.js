@@ -13,17 +13,17 @@ function Rook(side) {
 }
 
 Rook.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		valid = false;
 
 	// only one axis at a time
 	if (diffX === 0 || diffY === 0) {
 		// prevent jumping
-		if (!this.isJumping(newPos, board)) {
+		if (!Validator.isJumping(newPos, this.position, board)) {
 			valid = true;
 		}
 	}
 
 	return valid;
-}
+};

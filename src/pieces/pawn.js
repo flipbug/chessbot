@@ -14,14 +14,14 @@ function Pawn(side) {
 }
 
 Pawn.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// check direction
-	if ((this.side === PIECES.BLACK && this.y < newPos.y) ||
-		(this.side == PIECES.WHITE && this.y > newPos.y)) {
+	if ((this.side === PIECES.BLACK && this.position.y < newPos.y) ||
+		(this.side == PIECES.WHITE && this.position.y > newPos.y)) {
 		// only forward if no one in front
 		if (diffX === 0 && target === 0) {
 			// only one step at a time
@@ -43,4 +43,4 @@ Pawn.prototype.validateMove = function(newPos, board) {
 	}
 
 	return false;
-}
+};

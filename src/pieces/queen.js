@@ -13,18 +13,18 @@ function Queen(side) {
 }
 
 Queen.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		target = board[newPos.y][newPos.x],
 		valid = false;
 
 	// diagonal or straight move pattern
 	if (diffX == diffY || diffX === 0 || diffY === 0) {
 		// prevent jumping
-		if (!this.isJumping(newPos, board)) {
+		if (!Validator.isJumping(newPos, this.position, board)) {
 			valid = true;
 		}
 	}
 
 	return valid;
-}
+};

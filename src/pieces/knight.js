@@ -13,8 +13,8 @@ function Knight(side) {
 }
 
 Knight.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		valid = false;
 
 	// 2x1 jump pattern
@@ -23,4 +23,4 @@ Knight.prototype.validateMove = function(newPos, board) {
 	}
 
 	return valid;
-}
+};

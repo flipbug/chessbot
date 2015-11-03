@@ -78,7 +78,7 @@ Chessboard.prototype.draw = function(stage) {
 		}
 		yPos += this.dimension;
 	}
-}
+};
 
 Chessboard.prototype.initPieces = function(stage) {
 	var pieces = [[],[]];
@@ -93,12 +93,12 @@ Chessboard.prototype.initPieces = function(stage) {
 		}
 	}
 	return pieces;
-}
+};
 
 Chessboard.prototype.updateBoard = function(newPos, piece) {
-	this.board[piece.y][piece.x] = 0;
+	this.board[piece.position.y][piece.position.x] = 0;
 	this.board[newPos.y][newPos.x] = piece;
-}
+};
 
 Chessboard.prototype.isPieceOnPosition = function(pos) {
 	var target = this.board[pos.y][pos.x];
@@ -106,8 +106,8 @@ Chessboard.prototype.isPieceOnPosition = function(pos) {
 		return true;
 	}
 	return false;
-}
+};
 
-Chessboard.prototype.getBoard = function() {
-	return this.board;
-}
+Chessboard.prototype.getPieceFromPosition = function(pos) {
+	return this.board[pos.y][pos.x];
+};

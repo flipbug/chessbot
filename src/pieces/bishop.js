@@ -13,17 +13,17 @@ function Bishop(side) {
 }
 
 Bishop.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		valid = false;
 
 	// diagonal move pattern
 	if (diffX == diffY) {
 		// prevent jumping
-		if (!this.isJumping(newPos, board)) {
+		if (!Validator.isJumping(newPos, this.position, board)) {
 			valid = true;
 		}
 	}
 
 	return valid;
-}
+};

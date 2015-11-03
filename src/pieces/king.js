@@ -13,8 +13,8 @@ function King(side) {
 }
 
 King.prototype.validateMove = function(newPos, board) {
-	var diffX = Math.abs(this.x - newPos.x),
-		diffY = Math.abs(this.y - newPos.y),
+	var diffX = Math.abs(this.position.x - newPos.x),
+		diffY = Math.abs(this.position.y - newPos.y),
 		valid = false;
 
 	// diagonal or straight move pattern
@@ -26,4 +26,4 @@ King.prototype.validateMove = function(newPos, board) {
 	}
 
 	return valid;
-}
+};
