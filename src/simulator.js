@@ -4,7 +4,7 @@
  * @author Daniel Milenkovic
  */
 function Simulator() {
-	this.depthLimit = 2;
+
 }
 
 /**
@@ -15,7 +15,7 @@ Simulator.prototype.generateGameTree = function(side, board, currentDepth) {
 	var scope = this,
 		possibleMoves = [];
 
-	if (currentDepth > this.depthLimit) {
+	if (currentDepth > SIMULATION.DEPTH_LIMIT) {
 		return [];
 	}
 
