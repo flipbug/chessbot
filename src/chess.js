@@ -87,7 +87,6 @@ Chess.prototype.killPiece = function(pos, attacker) {
 		if (pos.x == itemPos.x && pos.y == itemPos.y && attacker != item) {
 			scope.stage.removeChild(item.shape);
 			scope.pieces[victimSide].splice(index, 1);
-			// todo: do something with dead pieces
 			return true;
 		}
 	});
