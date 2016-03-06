@@ -21,7 +21,8 @@ var BOARD = {
 
 var EVENT = {
 	PIECE_MOVED: "pieceMoved",
-	TICK: "tick"
+	TICK: "tick",
+	RESTART_GAME: "restartGame"
 };
 
 var SIMULATION =  {

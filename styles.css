@@ -1,16 +1,39 @@
 body {
 	background: #F1EADB;
+	font-family: 'Montserrat', sans-serif;
+	margin: 30px;
 }
 
 h1 {
 	font-family: 'Montserrat', sans-serif;
 	font-size: 36px;
 	color: #D0C7B7;
-	margin-top: 20px;
-	margin-left: 20px;
+	margin-top: 0;
+	margin-left: 0;
 }
 
-canvas {
-	margin: 50px auto;
+a {
+	text-decoration:none;
+	color: #D0C7B7;
+}
+
+a:hover {
+	opacity: 0.7;
+}
+
+.center {
+	margin: 30px auto;
+	width: 540px;
+	display: block;
+}
+
+#settings-view {
+	display: none;
+	position: absolute;
+	top: 120px;
+	left: 30px;
+}
+
+#settings-view.visible {
 	display: block;
 }

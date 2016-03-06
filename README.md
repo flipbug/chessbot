@@ -10,4 +10,4 @@ A basic game of chess made with javascript
  * check, checkmate
  * highlighting of previous field
  * animations
- * proper build process
+ * decoupling of easeljs

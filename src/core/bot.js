@@ -36,8 +36,7 @@ Bot.prototype.findBestMove = function(gameTree) {
 	}
 };
 
-Bot.prototype.findBestMoveByValue = function(moves)
-{
+Bot.prototype.findBestMoveByValue = function(moves) {
 	var m = -Infinity;
 
 	for (var i = 0; i < moves.length; ++i) {
@@ -48,4 +47,3 @@ Bot.prototype.findBestMoveByValue = function(moves)
 
 	return m;
 };
-
