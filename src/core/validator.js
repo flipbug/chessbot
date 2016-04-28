@@ -8,16 +8,26 @@ game.core.validator = {
 	isValidMove: function(start, target, turn, board) {
 		var isValid = false;
 		var piece = board[start.y][start.x];
-
+		var targetPiece = board[target.y][target.x];
 		var diffX = Math.abs(start.x - target.x),
 			diffY = Math.abs(start.y - target.y);
+
+		// don't eat yourself
+		if (diffX == 0 && diffY == 0) {
+			return false;
+		}
+
+		// no friendly fire
+		if (targetPiece > 0 && ((piece < 10 && targetPiece < 10 ) || (piece > 10 && targetPiece > 10))) {
+			return false;
+		}
 
 		var pos = {
 			'diffX': diffX,
 			'diffY': diffY,
 			'start': start,
-			'target': target,
-		}
+			'target': target
+		};
 
 		switch (piece) {
 			case 1:
@@ -77,7 +87,7 @@ game.core.validator = {
 		// only one axis at a time
 		if (pos.diffX === 0 || pos.diffY === 0) {
 			// prevent jumping
-			if (!game.core.validator.isJumping(pos.start, pos.target, board)) {
+			if (!game.core.validator.isJumping(pos, board)) {
 				valid = true;
 			}
 		}

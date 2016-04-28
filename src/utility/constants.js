@@ -1,6 +1,20 @@
 var PIECES = {
 	BLACK: 0,
 	WHITE: 1,
+	VALUES: {
+		1: 1,
+		2: 2,
+		3: 3,
+		4: 4,
+		5: 5,
+		6: 100000000,
+		11: -1,
+		12: -2,
+		13: -3,
+		14: -4,
+		15: -5,
+		16: -100000000,
+	}
 };
 
 var DIFFICULTY = {
@@ -21,10 +35,11 @@ var BOARD = {
 
 var EVENT = {
 	PIECE_MOVED: "pieceMoved",
+	NEXT_TURN: "nextTurn",
 	TICK: "tick",
 	RESTART_GAME: "restartGame"
 };
 
 var SIMULATION =  {
-	DEPTH_LIMIT: 2
+	DEPTH_LIMIT: 3
 };

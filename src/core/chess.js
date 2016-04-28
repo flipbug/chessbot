@@ -3,7 +3,7 @@
  *
  * @author Daniel Milenkovic
  */
- game.core.Chess = function() {
+game.core.Chess = function() {
 
 	this.turn = 1;
 	this.log = [];
@@ -18,22 +18,6 @@
 	this.board[6] = [ 1,  1,  1,  1,  1,  1,  1,  1];
 	this.board[7] = [ 2,  3,  4,  5,  6,  4,  3,  2];
 
-    this.draw = function() {
-    	for (y = 0; y < this.board.length; y++) {
-    		var row = "";
-    		for (x = 0; x < this.board[y].length; x++) {
-    			var piece = this.board[y][x];
-    			if (piece > 10) {
-    				row += " " + piece + " ";
-    			}
-    			else {
-    				row += "  " + piece + " ";
-    			}
-    		}
-    		console.log(row);
-    	}
-    };
-
     this.move = function(start, target) {
     	var piece = this.board[start.y][start.x];
     	if (piece > 0) {
@@ -42,6 +26,7 @@
     				this.updateBoard(start, target);
     				this.turn = 1 - this.turn;
     				this.log.push([start, target]);
+                    this.sendEvent(EVENT.NEXT_TURN);
     			} else {
     				console.log("invalid move");
     			}
@@ -54,7 +39,6 @@
     this.updateBoard = function(start, target) {
     	this.board[target.y][target.x] = this.board[start.y][start.x];
     	this.board[start.y][start.x] = 0;
-    	this.draw();
     };
 
     this.sendEvent = function(event, data) {
@@ -62,4 +46,22 @@
     	window.dispatchEvent(event);
     };
 
+};
+
+game.core.Chess.prototype.toString = function() {
+    var string = "";
+	for (y = 0; y < this.board.length; y++) {
+		var row = "";
+		for (x = 0; x < this.board[y].length; x++) {
+			var piece = this.board[y][x];
+			if (piece > 10) {
+				row += " " + piece + " ";
+			}
+			else {
+				row += "  " + piece + " ";
+			}
+		}
+		string += row + "\n";
+	}
+    return string;
 };
