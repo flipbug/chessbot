@@ -29,8 +29,8 @@ game.ai.Bot.prototype.findBestMove = function(gameTree, side) {
 	var move = [];
 	var currentScore = 0;
 	for (var i = 0; i < gameTree.length; i++) {
-		var score = this.evaluatePathScore(gameTree[i]);
-		if ((side == PIECES.BLACK && currentScore < score) || (side == PIECES.WHITE && currentScore > score)) {
+		var score = this.evaluatePathScore(gameTree[i], side, 0);
+		if ((side == PIECES.BLACK && currentScore <= score) || (side == PIECES.WHITE && currentScore >= score)) {
 			currentScore = score;
 			move = gameTree[i];
 		}
@@ -41,13 +41,16 @@ game.ai.Bot.prototype.findBestMove = function(gameTree, side) {
 	return move;
 };
 
-game.ai.Bot.prototype.evaluatePathScore = function(moves) {
-	var score = 0;
+game.ai.Bot.prototype.evaluatePathScore = function(moves, side, score) {
+	var result = 0;
 	if (moves && moves.length) {
 		score = moves[2];
 		if (moves[3] && moves[3].length > 0) {
 			for (var i = 0; i < moves[3].length; i++) {
-				score += this.evaluatePathScore(moves[3][i])
+				result = this.evaluatePathScore(moves[3][i], 1 - side, score);
+				if ((side == PIECES.BLACK && result < score) || (side == PIECES.WHITE && result > score)) {
+					score += result;
+				}
 			}
 		}
 	}

@@ -52,7 +52,7 @@ game.core.validator = {
 				break;
 			case 6:
 			case 16:
-				isValid = game.core.validator.isValidKnightMove(pos, board, turn);
+				isValid = game.core.validator.isValidKingMove(pos, board, turn);
 				break;
 		}
 		return isValid;

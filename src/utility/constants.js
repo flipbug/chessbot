@@ -41,5 +41,5 @@ var EVENT = {
 };
 
 var SIMULATION =  {
-	DEPTH_LIMIT: 3
+	DEPTH_LIMIT: 4
 };
