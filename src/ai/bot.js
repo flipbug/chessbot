@@ -9,20 +9,30 @@ game.ai.Bot = function(side) {
 }
 
 game.ai.Bot.prototype.makeMove = function(board) {
-	var gameTree = this.simulator.generateGameTree(board, this.side, 0);
-	var move = this.findBestMove(gameTree, this.side);
+	var busy = false;
+	var scope = this;
 
-	console.log(gameTree);
-	console.log(move);
+	// use an interval to achieve asynchronous code execution
+	var process = setInterval(function() {
+		if (!busy) {
+			busy = true;
+			var gameTree = scope.simulator.generateGameTree(board, scope.side, 0);
+			var move = scope.findBestMove(gameTree, scope.side);
 
-	var event = new CustomEvent(EVENT.PIECE_MOVED, {
-		'detail': {
-			'start': new Vector(move[0][0],move[0][1]),
-			'target': new Vector(move[1][0],move[1][1])
+			console.log(gameTree);
+			console.log(move);
+
+			var event = new CustomEvent(EVENT.PIECE_MOVED, {
+				'detail': {
+					'start': new Vector(move[0][0],move[0][1]),
+					'target': new Vector(move[1][0],move[1][1])
+				}
+			});
+			window.dispatchEvent(event);
+			clearInterval(process);
 		}
-	});
+	}, 1000);
 
-	window.dispatchEvent(event);
 };
 
 game.ai.Bot.prototype.findBestMove = function(gameTree, side) {
